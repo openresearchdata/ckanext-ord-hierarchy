@@ -140,7 +140,7 @@ def _add_child_bullets(html, pkg):
 
 class OrdHierarchyPlugin(p.SingletonPlugin):
     """
-    Plugin for public-facing version of data.bris site
+    Plugin for public-facing version of ORD site
     """
     p.implements(p.IConfigurer)
     p.implements(p.IConfigurable)
@@ -148,9 +148,6 @@ class OrdHierarchyPlugin(p.SingletonPlugin):
     p.implements(p.IRoutes)
 
     package_link = '/dataset/'
-
-    # Create resource for serving up slideshow js
-    p.toolkit.add_resource('public/javascript/modules', 'databris-ui-js-lib')
 
     def configure(self,config):
         # Get values from ckan config
@@ -164,13 +161,6 @@ class OrdHierarchyPlugin(p.SingletonPlugin):
         # add our templates
         p.toolkit.add_template_directory(config, 'templates')
         p.toolkit.add_public_directory(config, 'public')
-
-        # create resource
-        # p.toolkit.add_resource('resource', 'databris_resource')
-        #
-        # requires the following in template
-        # {% resource 'databris_resource/jquery.jcarousel.js' %}
-        # not currently working
 
     def get_helpers(self):
         '''Register the title_ordered_groups() and get_child_packages functions above as template
