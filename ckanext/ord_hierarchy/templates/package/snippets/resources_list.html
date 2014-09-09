@@ -1,0 +1,54 @@
+{# 
+Renders a list of resources with icons and view links.
+
+resources - A list of resources to render
+pkg - A package object that the resources belong to.
+
+Example:
+
+  {% snippet "package/snippets/resources_list.html", pkg=pkg, resources=pkg.resources %}
+
+#}
+<section id="dataset-resources" class="resources module-content">
+
+  {% set top = h.ord_hierarchy_top_package(pkg.id) %}
+  {% if top %}
+    <h3>{{ _('Back to top level') }}</h3>
+    <ul class="parent-list">
+        <li>
+          {{ h.dataset_link(top) }}
+        </li>
+    </ul>
+
+
+    {% set parent = h.ord_hierarchy_parent_package(pkg.id) %}
+    {% if parent.id != top.id %}
+      <h3>{{ _('Up one level') }}</h3>
+      <ul class="parent-list">
+          <li>
+            {{ h.dataset_link(parent) }}
+          </li>
+      </ul>
+    {% endif %}
+  {% endif %}
+
+  {% set tree_html = h.ord_hierarchy_get_datatree(pkg) %}
+  {% if tree_html %}
+    <h3>{{ _('Sub-levels') }}</h3>
+    {{ tree_html|safe }}
+  {% endif %}
+
+  {% if resources %}
+  <h3>{{ _('Data Resources') }}</h3>
+    <ul class="resource-list">
+      {% for resource in resources|sort(attribute='name') %}
+        {% snippet 'package/snippets/resource_item.html', pkg=pkg, res=resource %}
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>
+      {# Removing 'why not add some' option when there are no resources for the dataset #}
+    </p>
+  {% endif %}
+
+</section>
