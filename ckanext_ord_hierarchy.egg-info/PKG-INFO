@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: ckanext-ord-hierarchy
+Version: 1.0
+Summary: An extension to create a hierarchy of datasets
+Home-page: http://liip.ch
+Author: Liip AG
+Author-email: ogd@liip.ch
+License: GPL
+Description: 
+            
+Platform: UNKNOWN
