@@ -16,7 +16,7 @@ setup(
     url='http://liip.ch',
     license='GPL',
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
-    namespace_packages=['ckanext', 'ckanext.ord-hierarchy'],
+    namespace_packages=['ckanext', 'ckanext.ord_hierarchy'],
     include_package_data=True,
     zip_safe=False,
     install_requires=[
@@ -24,6 +24,6 @@ setup(
     ],
     entry_points='''
         [ckan.plugins]
-        ord_hierarchy=ckanext.ord-hierarchy.plugin:OrdHierarchyPlugin
+        ord_hierarchy=ckanext.ord_hierarchy.plugin:OrdHierarchyPlugin
     ''',
 )

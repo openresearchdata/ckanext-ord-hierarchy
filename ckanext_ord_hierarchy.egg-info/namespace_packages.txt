@@ -1,2 +1,2 @@
 ckanext
-ckanext.ord-hierarchy
+ckanext.ord_hierarchy

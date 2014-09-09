@@ -157,7 +157,7 @@ class OrdHierarchyPlugin(p.SingletonPlugin):
         site_url = config.get('ckan.site_url', None)        
     
         if site_url is not None:
-            ORD_hierarchy.package_link = site_url + '/dataset/'
+            OrdHierarchyPlugin.package_link = site_url + '/dataset/'
 
     def update_config(self, config):
 
@@ -180,11 +180,11 @@ class OrdHierarchyPlugin(p.SingletonPlugin):
         # extension they belong to, to avoid clashing with functions from
         # other extensions.
         return {
-            'ORD_hierarchy_title_ordered_groups': title_ordered_groups, 
-            'ORD_hierarchy_child_packages': get_child_packages,
-            'ORD_hierarchy_parent_package': get_parent_package,
-            'ORD_hierarchy_top_package': get_top_level_package,
-            'ORD_hierarchy_get_datatree': get_package_tree
+            'ord_hierarchy_title_ordered_groups': title_ordered_groups, 
+            'ord_hierarchy_child_packages': get_child_packages,
+            'ord_hierarchy_parent_package': get_parent_package,
+            'ord_hierarchy_top_package': get_top_level_package,
+            'ord_hierarchy_get_datatree': get_package_tree
             }
 
     def before_map(self, map):
