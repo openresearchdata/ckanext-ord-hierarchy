@@ -46,6 +46,7 @@ def get_parent_package(id):
 
     return parent
 
+
 def get_top_level_package(id):
     ''' Returns the top level package of the hierarchy of which the package with id 
     is a child or an empty dict if this is the top level package'''
@@ -115,6 +116,20 @@ def get_package_tree(pkg):
     finally:       
         model.Session.commit()
 
+# We need to be able to edit relationships manually, since there are no harvesters to do this for us yet
+def add_child_relationship(pkg, pkg2):
+    user = p.toolkit.get_action('get_site_user')({}, {})
+    context = {'user': user['name']}
+    data_dict = {
+        'subject': pkg,
+        'object': pkg2,
+        'type': 'child_of',
+    }
+    p.toolkit.get_action('create_package_relationship')(context, data_dict)
+
+def delete_child_relationship(pkg, pk2):
+    pass
+
 
 def _add_child_packages(pkg):
 
@@ -174,7 +189,9 @@ class OrdHierarchyPlugin(p.SingletonPlugin):
             'ord_hierarchy_child_packages': get_child_packages,
             'ord_hierarchy_parent_package': get_parent_package,
             'ord_hierarchy_top_package': get_top_level_package,
-            'ord_hierarchy_get_datatree': get_package_tree
+            'ord_hierarchy_get_datatree': get_package_tree,
+            'ord_hierarchy_add_child': add_child_relationship,
+            'ord_hierarchy_delete_child': delete_child_relationship
             }
 
     def before_map(self, map):
