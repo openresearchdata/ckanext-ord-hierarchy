@@ -57,6 +57,9 @@ def get_top_level_package(id):
         return {}
 
     # Check cache
+    if not dbutil.cached_tables:
+        dbutil.init_tables()
+
     try:
         top_pkg_id = dbutil.get_top_pkg(id)
         if top_pkg_id:
@@ -175,9 +178,7 @@ class OrdHierarchyPlugin(p.SingletonPlugin):
             'ord_hierarchy_child_packages': get_child_packages,
             'ord_hierarchy_parent_package': get_parent_package,
             'ord_hierarchy_top_package': get_top_level_package,
-            'ord_hierarchy_get_datatree': get_package_tree,
-            'ord_hierarchy_add_child': add_child_relationship,
-            'ord_hierarchy_delete_child': delete_child_relationship
+            'ord_hierarchy_get_datatree': get_package_tree
             }
 
     def before_map(self, map):
