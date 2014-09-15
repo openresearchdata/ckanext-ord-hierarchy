@@ -150,6 +150,7 @@ class OrdHierarchyPlugin(p.SingletonPlugin):
     p.implements(p.IConfigurable)
     p.implements(p.ITemplateHelpers)
     p.implements(p.IRoutes)
+    p.implements(p.IFacets)
 
     package_link = '/dataset/'
 
@@ -188,3 +189,16 @@ class OrdHierarchyPlugin(p.SingletonPlugin):
 
     def after_map(self, map):
         return map
+
+    #IFacets functions
+    def dataset_facets(self, facets_dict, package_type):
+        facets_dict['extras_level'] = p.toolkit._('Level')
+        return facets_dict
+
+    def group_facets(self, facets_dict, group_type, package_type):
+        facets_dict['extras_level'] = p.toolkit._('Level')
+        return facets_dict
+
+    def organization_facets(self, facets_dict, organization_type, package_type):
+        facets_dict['extras_level'] = p.toolkit._('Level')
+        return facets_dict
