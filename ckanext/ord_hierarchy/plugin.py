@@ -116,20 +116,6 @@ def get_package_tree(pkg):
     finally:       
         model.Session.commit()
 
-# We need to be able to edit relationships manually, since there are no harvesters to do this for us yet
-def add_child_relationship(pkg, pkg2):
-    user = p.toolkit.get_action('get_site_user')({}, {})
-    context = {'user': user['name']}
-    data_dict = {
-        'subject': pkg,
-        'object': pkg2,
-        'type': 'child_of',
-    }
-    p.toolkit.get_action('create_package_relationship')(context, data_dict)
-
-def delete_child_relationship(pkg, pk2):
-    pass
-
 
 def _add_child_packages(pkg):
 
