@@ -25,8 +25,22 @@ def get_child_packages(id):
 
     # Direct Solr request is far faster
     # fetch limit 1000 (I hope that gets everything)
-    return p.toolkit.get_action('package_search')(data_dict={'fq': 'child_of:' + id, 'rows': 1000})['results']
+    # return p.toolkit.get_action('package_search')(data_dict={'fq': 'child_of:' + id, 'rows': 1000})['results']
 
+    relationships = []
+    try:
+        relationships = p.toolkit.get_action('package_relationships_list')(
+                data_dict={'id': id, 'rel': 'parent_of'})
+    except Exception, e:
+            return {}
+            
+    children = []
+    if relationships:
+        for rel in relationships:
+            child = p.toolkit.get_action('package_show')(
+                data_dict={'id': rel['object']})
+            children.append(child)
+    return children
 
 def get_parent_package(id):
     ''' Returns the parent package of the package with id: id'''
@@ -95,6 +109,9 @@ def get_package_tree(pkg):
 
     try:
         # Check cache
+        if not dbutil.cached_tables:
+            dbutil.init_tables()
+            
         html_tree = dbutil.get_html_tree(pkg['id'])
         if html_tree:
             return html_tree
@@ -168,8 +185,7 @@ class OrdHierarchyPlugin(p.SingletonPlugin):
         p.toolkit.add_public_directory(config, 'public')
 
     def get_helpers(self):
-        '''Register the title_ordered_groups() and get_child_packages functions above as template
-        helper functions.
+        '''Register the functions above as template helper functions.
         '''
         # Template helper function names should begin with the name of the
         # extension they belong to, to avoid clashing with functions from

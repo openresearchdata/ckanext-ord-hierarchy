@@ -20,7 +20,6 @@ Example:
         </li>
     </ul>
 
-
     {% set parent = h.ord_hierarchy_parent_package(pkg.id) %}
     {% if parent.id != top.id %}
       <h3>{{ _('Up one level') }}</h3>
@@ -31,7 +30,7 @@ Example:
       </ul>
     {% endif %}
   {% endif %}
-
+  
   {% set tree_html = h.ord_hierarchy_get_datatree(pkg) %}
   {% if tree_html %}
     <h3>{{ _('Sub-levels') }}</h3>
