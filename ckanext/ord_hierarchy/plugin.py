@@ -5,7 +5,6 @@ import dbutil
 import ckan.model as model
 
 import re
-import collections
 
 import logging
 log = logging.getLogger(__name__)
@@ -168,7 +167,6 @@ class OrdHierarchyPlugin(p.SingletonPlugin):
     p.implements(p.IConfigurable)
     p.implements(p.ITemplateHelpers)
     p.implements(p.IRoutes)
-    p.implements(p.IFacets)
 
     package_link = '/dataset/'
 
@@ -207,27 +205,3 @@ class OrdHierarchyPlugin(p.SingletonPlugin):
     def after_map(self, map):
         return map
 
-    #IFacets functions
-    def dataset_facets(self, facets_dict, package_type):
-        dummy_facets = facets_dict
-        facets_dict = collections.OrderedDict()
-        facets_dict['extras_level'] = p.toolkit._('Level')
-        for key in dummy_facets.keys():
-            facets_dict[key] = dummy_facets[key]
-        return facets_dict
-
-    def group_facets(self, facets_dict, group_type, package_type):
-        dummy_facets = facets_dict
-        facets_dict = collections.OrderedDict()
-        facets_dict['extras_level'] = p.toolkit._('Level')
-        for key in dummy_facets.keys():
-            facets_dict[key] = dummy_facets[key]
-        return facets_dict
-
-    def organization_facets(self, facets_dict, organization_type, package_type):
-        dummy_facets = facets_dict
-        facets_dict = collections.OrderedDict()
-        facets_dict['extras_level'] = p.toolkit._('Level')
-        for key in dummy_facets.keys():
-            facets_dict[key] = dummy_facets[key]
-        return facets_dict
