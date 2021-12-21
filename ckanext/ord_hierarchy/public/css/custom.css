@@ -1,0 +1,98 @@
+.panel-child_datasets {
+    color: #1c6387;
+}
+
+.panel-group {
+    padding-bottom: 10px;
+    /*border: 1px solid rgb(191, 191, 191)*/
+}
+
+.panel-body {
+    /*border: 1px solid rgb(191, 191, 191);*/
+    border-radius: 2px;
+}
+
+.panel-heading {
+    border-left: 0;
+    padding-left: 0px !important;
+}
+
+.panel-heading .accordion-toggle:after {
+    /* symbol for "opening" panels */
+    font-family: 'Glyphicons Halflings';  /* essential for enabling glyphicon */
+    content: "\e080";    /* adjust as needed, taken from bootstrap.css */
+    float: right;        /* adjust as needed */
+    color: grey;         /* adjust as needed */
+}
+
+.panel-heading .accordion-toggle[aria-expanded="true"]:after {
+    content: "\e114";
+}
+
+.hierarchy_accordion_title {
+    color: black;
+    font-size: 20px;
+    font-weight: 500;
+}
+
+.hierarchy_accordion_toggle:link {
+    text-decoration: none;
+}
+
+.hierarchy_dataset_item_container {
+    /*border: 1px solid rgb(191, 191, 191);*/
+    padding-bottom: 10px;
+
+}
+
+.hierarchy_dataset_item:hover {
+    background-color: gray;
+}
+
+.hierarchy_list_item_title {
+    grid-area: title;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.hierarchy_list_item_title > h4 > a {
+    color: black !important;
+}
+
+.hierarchy_list_item_date {
+    grid-area: date;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.hierarchy_list_item_date > p {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.hierarchy_list_item_resources {
+    grid-area: resources;
+    text-align: right;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.hierarchy_list_item_resources > p {
+    margin: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.hierarchy_list_item-grid-container {
+  display: grid;
+  grid-template-areas:
+    'title title title title title resources'
+    'date date date date date date';
+  border: 1px solid rgb(191, 191, 191);
+}
+
+.hierarchy_list_item-grid-container > div {
+  background-color: rgba(255, 255, 255, 0.8);
+  /*padding: 20px 0;*/
+}
+

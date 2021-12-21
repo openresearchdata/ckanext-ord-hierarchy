@@ -1,3 +1,4 @@
+README.md
 setup.py
 ckanext/__init__.py
 ckanext/ord_hierarchy/__init__.py

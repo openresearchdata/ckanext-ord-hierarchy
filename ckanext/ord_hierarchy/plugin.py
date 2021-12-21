@@ -1,13 +1,18 @@
 import ckan as ckan
 import ckan.plugins as p
+import ckan.logic as logic
+from flask import Blueprint
+from flask import render_template, render_template_string
 
-import dbutil
+from .dbutil import *
 import ckan.model as model
 
 import re
 
 import logging
 log = logging.getLogger(__name__)
+
+include_empty_packages = True
 
 def title_ordered_groups():
     '''Return a list of groups sorted by title.'''
@@ -31,34 +36,50 @@ def get_child_packages(id):
     try:
         relationships = p.toolkit.get_action('package_relationships_list')(
                 data_dict={'id': id, 'rel': 'parent_of'})
-    except Exception, e:
-            return {}
+    except Exception as e:
+        log.warning(e)
+        return {}
             
     children = []
     if relationships:
         for rel in relationships:
-            child = p.toolkit.get_action('package_show')(
-                data_dict={'id': rel['object']})
-            children.append(child)
+
+            try:
+                if logic.check_access('package_show', {}, data_dict={'id': rel['object']}):
+                    child = p.toolkit.get_action('package_show')(
+                        data_dict={'id': rel['object']})
+                    if include_empty_packages is False and len(child['resources']) == 0:
+                        pass
+                    else:
+                        children.append(child)
+            except logic.NotAuthorized:
+                pass
+
     return children
 
-def get_parent_package(id):
+
+def get_parent_packages(id):
     ''' Returns the parent package of the package with id: id'''
 
     relationships = []
     try:
         relationships = p.toolkit.get_action('package_relationships_list')(
                 data_dict={'id': id, 'rel': 'child_of'})
-    except Exception, e:
+    except Exception as e:
+        log.warning(e)
         return {}
 
-    parent = {}
+    parents = []
     if relationships:
-        parent_rel = relationships[0]
-        parent = p.toolkit.get_action('package_show')(
-            data_dict={'id': parent_rel['object']})
-
-    return parent
+        for rel in relationships:
+            try:
+                if logic.check_access('package_show', {}, data_dict={'id': rel['object']}):
+                    parent = p.toolkit.get_action('package_show')(
+                        data_dict={'id': rel['object']})
+                    parents.append(parent)
+            except logic.NotAuthorized:
+                pass
+    return parents
 
 
 def get_top_level_package(id):
@@ -66,16 +87,16 @@ def get_top_level_package(id):
     is a child or an empty dict if this is the top level package'''
 
     current_id = id
-    current_parent = get_parent_package(current_id)
+    current_parent = get_parent_packages(current_id)
     if not current_parent:
         return {}
 
     # Check cache
-    if not dbutil.cached_tables:
-        dbutil.init_tables()
+    if not cached_tables:
+        init_tables()
 
     try:
-        top_pkg_id = dbutil.get_top_pkg(id)
+        top_pkg_id = get_top_pkg(id)
         if top_pkg_id:
             top_pkg = p.toolkit.get_action('package_show')(
                 data_dict={'id': top_pkg_id})
@@ -85,16 +106,16 @@ def get_top_level_package(id):
         else:
             while True:
                 current_id = current_parent['id']
-                parent = get_parent_package(current_id)
+                parent = get_parent_packages(current_id)
                 if not parent:
                     break
                 current_parent = parent
 
-            dbutil.cache_top_pkg(id,current_parent['id'])     
+            cache_top_pkg(id,current_parent['id'])
 
             return current_parent
 
-    except Exception, e:
+    except Exception as e:
         log.debug("Error getting top level package: %s" % e)
         return {}
 
@@ -109,10 +130,10 @@ def get_package_tree(pkg):
 
     try:
         # Check cache
-        if not dbutil.cached_tables:
-            dbutil.init_tables()
+        if not cached_tables:
+            init_tables()
             
-        html_tree = dbutil.get_html_tree(pkg['id'])
+        html_tree = get_html_tree(pkg['id'])
         if html_tree:
             return html_tree
 
@@ -125,11 +146,11 @@ def get_package_tree(pkg):
 
             # Set cache (if there is a tree)
             if html:
-                dbutil.cache_html_tree(pkg['id'],html)
+                cache_html_tree(pkg['id'], html)
 
             return html
 
-    except Exception, e:
+    except Exception as e:
         log.exception("Error getting html tree: %s" % e)
         return ''
 
@@ -167,10 +188,11 @@ class OrdHierarchyPlugin(p.SingletonPlugin):
     p.implements(p.IConfigurable)
     p.implements(p.ITemplateHelpers)
     p.implements(p.IRoutes)
+    p.implements(p.IBlueprint)
 
     package_link = '/dataset/'
 
-    def configure(self,config):
+    def configure(self, config):
         # Get values from ckan config
         site_url = config.get('ckan.site_url', None)        
     
@@ -192,10 +214,31 @@ class OrdHierarchyPlugin(p.SingletonPlugin):
         return {
             'ord_hierarchy_title_ordered_groups': title_ordered_groups, 
             'ord_hierarchy_child_packages': get_child_packages,
-            'ord_hierarchy_parent_package': get_parent_package,
+            'ord_hierarchy_parent_packages': get_parent_packages,
             'ord_hierarchy_top_package': get_top_level_package,
             'ord_hierarchy_get_datatree': get_package_tree
             }
+
+    def get_blueprint(self):
+        '''
+            Return a Flask Blueprint object to be registered by the app.
+        '''
+
+        controller = OrdHierarchyController()
+        # Create Blueprint for plugin
+        blueprint = Blueprint(self.name, self.__module__)
+
+        blueprint.template_folder = 'templates'
+
+        # Add plugin url rules to Blueprint object
+        rules = [
+            ('/dataset/relationships/<id>', 'relationships_read}', controller.relationship_view),
+        ]
+
+        for rule in rules:
+            blueprint.add_url_rule(*rule)
+
+        return blueprint
 
     def before_map(self, map):
         map.connect('licence', '/licence', controller='databris', action='licence'),
@@ -204,4 +247,15 @@ class OrdHierarchyPlugin(p.SingletonPlugin):
 
     def after_map(self, map):
         return map
+
+class OrdHierarchyController:
+
+    def relationship_view(self, id):
+        if logic.check_access('package_show', {}, data_dict={'id': id}):
+            pkg = p.toolkit.get_action('package_show')(
+                data_dict={'id': id})
+            print(pkg)
+
+        return render_template('package/relationship_read.html', pkg_dict=pkg)
+
 

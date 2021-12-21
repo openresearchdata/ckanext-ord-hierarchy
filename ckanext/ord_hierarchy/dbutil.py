@@ -44,7 +44,7 @@ def get_top_pkg(pkg_id):
 
         return top_pkg_id and top_pkg_id[0] or ""
 
-    except Exception, e:
+    except Exception as e:
         log.debug("Error query db cache for top_pkg_id: %s" % e)
         return ''
 
@@ -58,7 +58,7 @@ def get_html_tree(pkg_id):
 
         return tree_html and tree_html[0] or ""
 
-    except Exception, e:
+    except Exception as e:
         log.debug("Error query db cache for get_html_tree: %s" % e)
         return ''
 
@@ -90,6 +90,6 @@ def _update_cache(pkg_id, item, data):
 
             connection.execute(cache.insert().values(**values))
 
-    except Exception, e:
+    except Exception as e:
         log.debug("Error in update cache: %s" % e)
 
