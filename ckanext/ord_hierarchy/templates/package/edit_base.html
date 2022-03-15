@@ -19,7 +19,7 @@
     {% if h.check_config_permission('allow_dataset_collaborators') and h.check_access('package_collaborator_create', {'id': pkg_dict.id}) %}
         {{ h.build_nav_icon(pkg.type ~ '.collaborators_read', _('Collaborators'), id=pkg.name, icon='users')}}
     {% endif %}
-    <li class=""><a href="/dataset/relationships/{{ pkg.id }}"><i class="fa fa-sitemap"></i>&nbspRelationships</a></li>
+    <li class=""><a href="/dataset/relationships/{{ pkg.name }}"><i class="fa fa-sitemap"></i>&nbspRelationships</a></li>
 
 {% endblock %}
 

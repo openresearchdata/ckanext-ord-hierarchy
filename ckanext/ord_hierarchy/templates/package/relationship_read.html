@@ -30,14 +30,13 @@
 {% block subtitle %}{{ _('Relationships') }} {{ g.template_title_delimiter }} {{ super() }}{% endblock %}
 
 {% block page_primary_action %}
-  {% if h.check_access('package_collaborator_create', {'id': pkg_dict.id})%}
-    {% link_for _('Add Child Dataset'), named_route='dataset.new_collaborator', id=pkg_dict.name, class_='btn btn-primary', icon='plus-square' %}
-  {% endif %}
+    <a class="btn btn-primary" href="/dataset/relationships/{{ pkg_dict.name }}/add"><i class="fa fa-plus-square"></i> Add Child Dataset</a>
 {% endblock %}
 
 {% block primary_content_inner %}
   {% set child_packages = h.ord_hierarchy_child_packages(pkg_dict['id'])%}
-  {% set count = child_packages|length %}
+  {% set parent_packages = h.ord_hierarchy_parent_packages(pkg.id) %}
+  {% set count = child_packages|length + parent_packages|length %}
   <h3 class="page-heading">{{ count }} Datasets</h3>
   <table class="table table-header table-hover table-bordered">
     <thead>
@@ -48,6 +47,25 @@
       </tr>
     </thead>
     <tbody>
+      {% for package in parent_packages %}
+
+        {% set truncate = truncate or 130 %}
+        {% set truncate_title = truncate_title or 60 %}
+        {% set title = package.title or package.name %}
+        {% set display_title = h.truncate(title, truncate_title) %}
+
+        <tr>
+          <td class="media">
+              <h4><a href="{{h.url_for('%s.read' % package.type, id=package.name)}}" title="{{display_title}}">{{ display_title }}</a></h4></div>
+          </td>
+          <td> Parent </td>
+          <td>
+            <div class="btn-group pull-right">
+              <a class="btn btn-danger btn-sm" href="{{package.id}}/delete/{{pkg.id}}" data-module="confirm-action" data-module-content="{{ _('Are you sure you want to delete this relationship?') }}" title="{{ _('Delete') }}"><i class="fa fa-times"></i></a>
+            </div>
+          </td>
+        </tr>
+      {% endfor %}
       {% for package in child_packages %}
 
         {% set truncate = truncate or 130 %}
@@ -62,11 +80,12 @@
           <td> Child </td>
           <td>
             <div class="btn-group pull-right">
-              <a class="btn btn-danger btn-sm" href="{{ h.url_for('dataset.collaborator_delete', id=pkg_dict.name, user_id=user_id) }}" data-module="confirm-action" data-module-content="{{ _('Are you sure you want to delete this collaborator?') }}" title="{{ _('Delete') }}">{% block delete_button_text %}<i class="fa fa-times"></i>{% endblock %}</a>
+              <a class="btn btn-danger btn-sm" href="{{pkg.id}}/delete/{{package.id}}" data-module="confirm-action" data-module-content="{{ _('Are you sure you want to delete this relationship?') }}" title="{{ _('Delete') }}"><i class="fa fa-times"></i></a>
             </div>
           </td>
         </tr>
       {% endfor %}
+
     </tbody>
   </table>
 {% endblock %}

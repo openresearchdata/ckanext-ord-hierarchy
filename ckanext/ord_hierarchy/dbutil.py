@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, Integer, String, Text, MetaData
+from sqlalchemy import Table, Column, Integer, String, Text, MetaData, update
 from sqlalchemy.sql import select, text
 from sqlalchemy import func
 
@@ -93,3 +93,16 @@ def _update_cache(pkg_id, item, data):
     except Exception as e:
         log.debug("Error in update cache: %s" % e)
 
+def delete_relationship(subject_pkg_id, object_pkg_id):
+    connection = model.Session.connection()
+    try:
+
+        connection.execute(
+            text("""UPDATE public.package_relationship set "state" = 'deleted'
+                    WHERE subject_package_id = :subject_pkg_id
+                    AND object_package_id = :object_pkg_id """),
+                    subject_pkg_id=subject_pkg_id, object_pkg_id=object_pkg_id)
+        model.Session.commit()
+
+    except Exception as e:
+        log.debug(f"error in deleting relationship: {e}")

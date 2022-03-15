@@ -1,0 +1,160 @@
+{% extends "package/edit_base.html" %}
+
+{% block styles %}
+  <link rel="stylesheet" href="/css/custom.css" />
+{% endblock %}
+
+{% block primary_content_inner %}
+  {% link_for _('Back to dataset relationships'), named_route='dataset.collaborators_read', id=pkg_dict.name, class_='btn btn-default pull-right', icon='arrow-left' %}
+  <h1 class="page-heading">
+    {% block page_heading %} Add Child Dataset {% endblock %}
+  </h1>
+  {% block form %}
+  <form class="dataset-form add-member-form" method='post'>
+
+      {% if errors %}
+          <div id="attribute-errors-div" class="error-explanation alert alert-error">
+              <h5>Error could not add child dataset.</h5>
+              {% for error in errors %}
+                <p>{{error.attribute}}: {{error.message}}</p>
+              {% endfor %}
+          </div>
+      {% endif %}
+
+      <div class="form-group" id="field-organisation-name-group">
+        <label for="organisation_name" class="col-form-label required"><span title="This field is required" class="control-required">*</span> Organisation name</label>
+        <select id="organisation_name" name="organisation_name" class="form-control control-medium control-required" required="">
+            {% if form_data and form_data.organisation_name %}
+                <option value="{{form_data.organisation_name[0]}}">{{form_data.organisation_name[0]}}</option>
+            {% else %}
+                <option>select organisation</option>
+            {% endif %}
+        </select>
+    </div>
+
+      <div class="form-group" id="field-dataset-name-group">
+        <label for="dataset_name" class="col-form-label required "><span title="This field is required" class="control-required">*</span> Dataset name</label>
+        <select id="dataset_name" name="dataset_name" class="form-control control-medium" required="">
+            {% if form_data and form_data.dataset_name %}
+                <option value="{{form_data.dataset_name[0]}}">{{form_data.dataset_name[0]}}</option>
+            {% else %}
+                <option >select dataset</option>
+            {% endif %}
+        </select>
+      </div>
+
+      <div class="form-actions">
+        {% block form_actions %}
+        <button id="form_submit_btn" class="btn btn-primary" type="submit" name="save" >{{ _("Add Child") }}</button>
+        {% endblock %}
+      </div>
+
+
+  </form>
+
+
+
+  {% endblock %}
+{% endblock %}
+
+ {% block scripts %}
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.css" rel="stylesheet" />
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
+<script type="application/javascript">
+$(document).ready(function() {
+    $('#organisation_name').select2({
+        ajax: {
+            url: 'https://test.data.spatialhub.scot/api/3/action/organization_autocomplete?limit=10',
+            dataType: 'json',
+            data: function (params) {
+                var query = {
+                    q: params.term,
+                }
+                return query;
+            },
+            processResults: function (data) {
+                var transformed = $.map(data.result, function (el) {
+                         return {
+                             label: el.title,
+                             id: el.name
+                         };
+                });
+                return {
+                    results: transformed
+                };
+            },
+            cache: true
+        },
+        escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+        minimumInputLength: 1,
+        templateResult: format,
+        templateSelection: formatSelection
+    });
+
+    $('#dataset_name').select2({
+        ajax: {
+            url: function (request) {
+                var params = `fl=name+title&fq=organization:${$('#organisation_name').val()}&rows=100&include_private=True&q=name:${request.term}*`
+                var base_url = "https://test.data.spatialhub.scot/api/3/action/package_search?"
+                return base_url + params
+            },
+            dataType: 'json',
+            data: function (params) {
+                return {}
+            },
+            processResults: function (data) {
+                var transformed = $.map(data.result.results, function (el) {
+                         return {
+                             label: el.title,
+                             id: el.name
+                         };
+                });
+                return {
+                    results: transformed
+                };
+            },
+            cache: true
+        },
+        escapeMarkup: function (markup) { return markup; }, // let our custom formatter work
+        minimumInputLength: 1,
+        templateResult: format,
+        templateSelection: formatSelection
+    });
+
+    // $("#dataset_name").prop("disabled", true);
+    set_dataset_box()
+
+    $('#organisation_name').change(function() {
+        set_dataset_box()
+    })
+
+    function set_dataset_box(){
+        org_value = $('#organisation_name').val()
+        if (org_value == 'select organisation' || org_value.trim() == ''){
+            $("#dataset_name").prop("disabled", true);
+        } else {
+            $("#dataset_name").prop("disabled", false);
+        }
+    }
+});
+
+function format (item) {
+    if (!item.loading) {
+        return item.label;
+    }
+}
+
+function formatSelection (item) {
+  return item.id
+}
+
+</script>
+{% endblock %}
+
+{% block secondary_content %}
+{{ super() }}
+<div class="module module-narrow module-shallow">
+
+{% endblock %}
